@@ -1,8 +1,5 @@
 package cn.zhh.api;
 
-/**
- * JarsLink模块运行时异常
- */
 public class ModuleRuntimeException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;

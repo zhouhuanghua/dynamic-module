@@ -1,22 +1,30 @@
 package cn.zhh.module;
 
-import cn.zhh.api.MyModuleConfig;
+import cn.zhh.api.HttpAction;
+import cn.zhh.api.ModuleConfig;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
-public class KingModuleConfig implements MyModuleConfig {
+import java.util.List;
 
+public class KingModuleConfig extends ModuleConfig {
 
-    @Override
     public String getName() {
         return "King";
     }
 
-    @Override
     public String getDesc() {
         return "Loops King";
     }
 
-    @Override
     public String getVersion() {
         return "1.0";
+    }
+
+    @Override
+    public List<HttpAction> registerServlet() {
+        return Lists.newArrayList(new HttpAction(Sets.newHashSet("/king"), 1, (req, resp) -> {
+            resp.getWriter().println("this is king");
+        }));
     }
 }

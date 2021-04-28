@@ -1,75 +1,73 @@
+/*
+ *
+ *  * Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *      http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
+ *
+ */
 package cn.zhh.api;
 
-import java.util.Date;
-import java.util.Map;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.CachedIntrospectionResults;
+import org.springframework.context.ConfigurableApplicationContext;
 
-/**
- * JarsLink模块接口
- */
-public interface Module {
+import java.beans.Introspector;
+import java.util.ResourceBundle;
 
-    /**
-     * 查找处理请求的Action
-     *
-     * @param actionName
-     * @return
-     */
-    <R, T> Action<R, T> getAction(String actionName);
+import static com.google.common.base.Preconditions.checkNotNull;
 
-    /**
-     * 获取全部的Action
-     *
-     * @return action名称和Action对象
-     */
-    Map<String, Action> getActions();
+@Data
+@Slf4j
+@AllArgsConstructor
+public class Module {
 
-    /**
-     * 查找处理请求的Action
-     *
-     * @param actionName
-     * @param actionRequest
-     * @return
-     */
-    <R, T> T doAction(String actionName, R actionRequest);
+    private String fileName;
 
-    /**
-     * 模块名
-     *
-     * @return
-     */
-    String getName();
+    private ModuleConfig moduleConfig;
 
-    /**
-     * 模块版本号
-     *
-     * @return
-     */
-    String getVersion();
+    private ModuleApplicationContext moduleApplicationContext;
 
-    /**
-     * 模块的创建时间
-     *
-     * @return
-     */
-    Date getCreation();
+    public void destroy() {
+        if (log.isInfoEnabled()) {
+            log.info("Close application context: {}", moduleApplicationContext);
+        }
+        // close spring context
+        closeQuietly(moduleApplicationContext);
+        // clean classloader
+        clear(moduleApplicationContext.getClassLoader());
+    }
 
-    /**
-     * 销毁
-     */
-    void destroy();
+    private void closeQuietly(ConfigurableApplicationContext applicationContext) {
+        checkNotNull(applicationContext, "applicationContext is null");
+        try {
+            applicationContext.close();
+        } catch (Exception e) {
+            log.error("Failed to close application context", e);
+        }
+    }
 
-    /**
-     * 获取spring上下
-     *
-     * @return
-     */
-    ClassLoader getChildClassLoader();
-
-    /**
-     * 获取模块配置
-     *
-     * @return
-     */
-    ModuleConfig getModuleConfig();
+    public void clear(ClassLoader classLoader) {
+        checkNotNull(classLoader, "classLoader is null");
+        // Introspector缓存BeanInfo类来获得更好的性能。卸载时刷新所有Introspector的内部缓存。
+        Introspector.flushCaches();
+        // 从已经使用给定类加载器加载的缓存中移除所有资源包
+        ResourceBundle.clearCache(classLoader);
+        // Clear the introspection cache for the given ClassLoader
+        CachedIntrospectionResults.clearClassLoader(classLoader);
+        LogFactory.release(classLoader);
+    }
 
 }
