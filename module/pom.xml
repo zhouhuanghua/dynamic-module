@@ -9,6 +9,14 @@
     <version>1.0-SNAPSHOT</version>
     <name>module</name>
 
+    <dependencies>
+        <dependency>
+            <groupId>cn.zhh</groupId>
+            <artifactId>api</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>

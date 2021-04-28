@@ -1,2 +1,7 @@
 /.idea
+/api/api.iml
+/api/target/
+/module/module.iml
+/module/target/
+/project/project.iml
 /project/target/
