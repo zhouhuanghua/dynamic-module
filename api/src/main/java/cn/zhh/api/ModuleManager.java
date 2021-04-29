@@ -17,20 +17,25 @@ public class ModuleManager implements DisposableBean {
 
     public Module register(Module module) {
         checkNotNull(module, "module is null");
-        String name = module.getModuleConfig().getName();
+        String name = module.getName();
         if (log.isInfoEnabled()) {
-            log.info("Put Module: {}", module.getFileName());
+            log.info("Put module: {}", name);
         }
 
-        return allModules.put(module.getFileName(), module);
+        return allModules.put(name, module);
     }
 
-    public Module remove(String fileName) {
-        checkNotNull(fileName, "file name is null");
+    public Module find(String moduleName) {
+        checkNotNull(moduleName, "module name is null");
+        return allModules.get(moduleName);
+    }
+
+    public Module remove(String moduleName) {
+        checkNotNull(moduleName, "module name is null");
         if (log.isInfoEnabled()) {
-            log.info("Remove Module: {}", fileName);
+            log.info("Remove module: {}", moduleName);
         }
-        return allModules.remove(fileName);
+        return allModules.remove(moduleName);
     }
 
     @Override
@@ -39,14 +44,10 @@ public class ModuleManager implements DisposableBean {
             try {
                 each.destroy();
             } catch (Exception e) {
-                log.error("Failed to destroy module: " + each.getModuleConfig().getName(), e);
+                log.error("Failed to destroy module: " + each.getName(), e);
             }
         }
         allModules.clear();
-    }
-
-    public static String getModuleKey(String fileName) {
-        return fileName.substring(0, fileName.lastIndexOf("."));
     }
 
 }

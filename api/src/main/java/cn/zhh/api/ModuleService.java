@@ -4,7 +4,9 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.nio.file.*;
+import java.util.Objects;
 
 @Slf4j
 public class ModuleService {
@@ -25,7 +27,11 @@ public class ModuleService {
     }
 
     private void loadExistModule() {
-        Paths.get(watchPath).forEach(this::loadAndRegister);
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(watchPath), "*.jar")) {
+            stream.forEach(this::loadAndRegister);
+        } catch (IOException e) {
+            throw new ModuleRuntimeException("load exist jar exception");
+        }
     }
 
     public void destroy() {
@@ -47,18 +53,31 @@ public class ModuleService {
                     // 得到一个key及其事件
                     WatchKey key = watchService.take();
                     for (WatchEvent<?> event : key.pollEvents()) {
-                        // 检查是否为创建事件
+                        String fileName = event.context().toString();
+                        // 只处理jar文件
+                        if (!fileName.endsWith("jar")) {
+                            break;
+                        }
+                        // 检查事件
                         if (StandardWatchEventKinds.ENTRY_CREATE.equals(event.kind())) {
-                            log.info("【Dynamic-Module】 create file event: {}", event.context());
-                            loadAndRegister(Paths.get(watchPath, event.context().toString()));
+                            if (log.isInfoEnabled()) {
+                                log.info("【Dynamic-Module】 create file event: {}", fileName);
+                            }
+                            loadAndRegister(Paths.get(watchPath, fileName));
                         } else if (StandardWatchEventKinds.ENTRY_MODIFY.equals(event.kind())) {
-                            log.info("【Dynamic-Module】 modify file event: {}", event.context());
-                            loadAndRegister(Paths.get(watchPath, event.context().toString()));
+                            if (log.isInfoEnabled()) {
+                                log.info("【Dynamic-Module】 modify file event: {}", fileName);
+                            }
+                            loadAndRegister(Paths.get(watchPath, fileName));
                         } else if (StandardWatchEventKinds.ENTRY_DELETE.equals(event.kind())) {
-                            log.info("【Dynamic-Module】 delete file event: {}", event.context());
-                            removeModule(event.context().toString());
+                            if (log.isInfoEnabled()) {
+                                log.info("【Dynamic-Module】 delete file event: {}", fileName);
+                            }
+                            removeModule(fileName);
                         } else {
-                            log.info("【Dynamic-Module】 file watch invalid event: {}", event.context());
+                            if (log.isInfoEnabled()) {
+                                log.info("【Dynamic-Module】 file watch invalid event: {}", fileName);
+                            }
                         }
                     }
                     // 重置检测key
@@ -80,20 +99,24 @@ public class ModuleService {
     }
 
     private Module removeModule(String fileName) {
-        Module removed = moduleManager.remove(fileName);
+        Module removed = moduleManager.remove(fileNameToModuleName(fileName));
         destroyQuietly(removed);
         return removed;
     }
 
-    private static void destroyQuietly(Module module) {
-        if (module != null) {
+    private String fileNameToModuleName(String fileName) {
+        return fileName.substring(0, fileName.lastIndexOf("."));
+    }
+
+    private void destroyQuietly(Module module) {
+        if (Objects.nonNull(module)) {
             try {
-                if (log.isDebugEnabled()) {
-                    log.debug("Destroy module: {}", module.getModuleConfig().getName());
+                if (log.isInfoEnabled()) {
+                    log.info("Destroy module: {}", module.getName());
                 }
                 module.destroy();
             } catch (Exception e) {
-                log.error("Failed to destroy module " + module, e);
+                log.error("Failed to destroy module: " + module.getName(), e);
             }
         }
     }
