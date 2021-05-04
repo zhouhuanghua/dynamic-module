@@ -1,7 +1,5 @@
-/.idea
-/api/api.iml
-/api/target/
-/module/module.iml
-/module/target/
-/project/project.iml
-/project/target/
+.idea
+/dynamic-module/target/
+/project/project-api/target/
+/project/project-server/target/
+/test-module/target/
