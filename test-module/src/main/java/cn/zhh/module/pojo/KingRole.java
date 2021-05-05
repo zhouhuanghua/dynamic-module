@@ -1,15 +1,15 @@
-package cn.zhh.project.api.pojo;
+package cn.zhh.module.pojo;
 
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
-public class Student {
+public class KingRole {
 
     private Long id;
-    private String code;
-    private String name;
+    private String userCode;
+    private Byte role;
     private LocalDateTime createTime;
 
 }

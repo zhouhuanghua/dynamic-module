@@ -84,7 +84,7 @@ public class Module {
             Thread.currentThread().setContextClassLoader(moduleClassLoader);
             return handler.execute(handlerArgs);
         } catch (Exception e) {
-            log.error("调用模块出现异常，handler=" + handler.getHandlerName(), e);
+            log.error("Invoke module exception, handler=" + handler.getHandlerName(), e);
             throw new ModuleRuntimeException("doHandlerWithinModuleClassLoader has error, handler=" + handler, e);
         } finally {
             Thread.currentThread().setContextClassLoader(classLoader);

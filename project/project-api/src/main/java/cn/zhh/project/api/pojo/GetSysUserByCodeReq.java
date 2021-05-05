@@ -3,8 +3,8 @@ package cn.zhh.project.api.pojo;
 import lombok.Data;
 
 @Data
-public class GetStudentByIdReq {
+public class GetSysUserByCodeReq {
 
-    private Long id;
+    private String code;
 
 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zhh.project.server.mapper.SysUserMapper">
+
+    <select id="selectByCode" resultType="cn.zhh.project.api.pojo.SysUser">
+        select id, code, name, mobile, create_time as createTime
+        from sys_user
+        where code = #{code}
+    </select>
+
+</mapper>
