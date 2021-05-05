@@ -1,15 +1,16 @@
-package cn.zhh.project.server.base;
+package cn.zhh.dynamic_module;
 
-import cn.zhh.dynamic_module.ModuleManager;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 @RestController
 @RequestMapping("modules")
+@ConditionalOnBean(ModuleManager.class)
 public class ModuleController {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
