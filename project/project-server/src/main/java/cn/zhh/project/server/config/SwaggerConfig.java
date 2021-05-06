@@ -1,8 +1,7 @@
-package cn.zhh.project.server.conf;
+package cn.zhh.project.server.config;
 
 import io.swagger.annotations.Api;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -14,7 +13,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
 @EnableSwagger2
-@ComponentScan(basePackages = "cn.zhh.project.server")//配置扫描的基础包
 public class SwaggerConfig {
 
     @Bean
@@ -26,8 +24,9 @@ public class SwaggerConfig {
                 .apis(RequestHandlerSelectors.withClassAnnotation(Api.class))
                 .build();
     }
-    private ApiInfo apiInfo(){
-        return  new ApiInfoBuilder()
+
+    private ApiInfo apiInfo() {
+        return new ApiInfoBuilder()
                 .title("API接口文档")
                 .description("API接口文档，及相关接口的说明")
                 .version("1.0.0")

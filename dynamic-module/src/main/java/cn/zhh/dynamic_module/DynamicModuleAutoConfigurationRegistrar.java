@@ -15,7 +15,7 @@ public class DynamicModuleAutoConfigurationRegistrar implements ImportBeanDefini
     @Override
     public void registerBeanDefinitions(AnnotationMetadata annotationMetadata, @NonNull BeanDefinitionRegistry beanDefinitionRegistry) {
         AnnotationAttributes annotationAttributes = AnnotationAttributes.fromMap(annotationMetadata.getAnnotationAttributes(EnableDynamicModuleAutoConfiguration.class.getName()));
-        if (Objects.nonNull(annotationAttributes)) {
+        if (Objects.isNull(annotationAttributes)) {
             throw new ModuleRuntimeException("@EnableDynamicModuleAutoConfiguration annotationAttributes is null");
         }
         AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(ModuleService.class)
