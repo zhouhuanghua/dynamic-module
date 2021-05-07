@@ -69,7 +69,7 @@ public class ModuleClassLoader extends URLClassLoader {
 
     private boolean isEligibleForOverriding(final String name) {
         checkNotNull(name, "name is null");
-        return !isExcluded(name) && any(overridePackages, prefix -> name.startsWith(prefix));
+        return !isExcluded(name) && any(overridePackages, name::startsWith);
     }
 
     protected boolean isExcluded(String className) {

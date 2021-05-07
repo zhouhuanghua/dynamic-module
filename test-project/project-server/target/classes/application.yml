@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://thunderclap.cn:3306/test?useSSL=true
+    username: zhh
+    password: 123456
+
+mybatis:
+  mapper-locations: mapper/*.xml

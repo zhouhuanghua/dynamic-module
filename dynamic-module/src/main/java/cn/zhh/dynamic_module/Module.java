@@ -11,6 +11,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.StringUtils;
 
 import java.beans.Introspector;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -22,7 +23,7 @@ import static com.google.common.base.Preconditions.checkState;
 @AllArgsConstructor
 public class Module {
 
-    private String name;
+    private Path jarPath;
 
     private ModuleConfig moduleConfig;
 
@@ -30,8 +31,8 @@ public class Module {
     
     private final Map<String, Handler> handlers;
 
-    public Module(String name, ModuleConfig moduleConfig, ModuleApplicationContext moduleApplicationContext) {
-        this.name = name;
+    public Module(Path jarPath, ModuleConfig moduleConfig, ModuleApplicationContext moduleApplicationContext) {
+        this.jarPath = jarPath;
         this.moduleConfig = moduleConfig;
         this.moduleApplicationContext = moduleApplicationContext;
         this.handlers = scanHandlers();
@@ -41,7 +42,7 @@ public class Module {
         Map<String, Handler> handlers = Maps.newHashMap();
         // find Handler in module
         for (Handler handler : moduleApplicationContext.getBeansOfType(Handler.class).values()) {
-            String handlerName = handler.getHandlerName();
+            String handlerName = handler.name();
             if (!StringUtils.hasText(handlerName)) {
                 throw new ModuleRuntimeException("scanHandlers handlerName is null");
             }
@@ -84,7 +85,7 @@ public class Module {
             Thread.currentThread().setContextClassLoader(moduleClassLoader);
             return handler.execute(handlerArgs);
         } catch (Exception e) {
-            log.error("Invoke module exception, handler=" + handler.getHandlerName(), e);
+            log.error("Invoke module exception, handler=" + handler.name(), e);
             throw new ModuleRuntimeException("doHandlerWithinModuleClassLoader has error, handler=" + handler, e);
         } finally {
             Thread.currentThread().setContextClassLoader(classLoader);

@@ -6,7 +6,6 @@ import org.springframework.beans.CachedIntrospectionResults;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -52,9 +51,9 @@ public class ModuleLoader implements ApplicationContextAware {
             moduleApplicationContext.scan(moduleConfig.scanPackages().toArray(new String[0]));
             moduleApplicationContext.refresh();
             if (log.isInfoEnabled()) {
-                log.info("Load module success: jarPath={}, desc={}", jarPath.toString(), moduleConfig.desc());
+                log.info("Load module success: name={}, version={}, jarPath={}", moduleConfig.name(), moduleConfig.version(), jarPath);
             }
-            return new Module(pathToModuleName(jarPath), moduleConfig, moduleApplicationContext);
+            return new Module(jarPath, moduleConfig, moduleApplicationContext);
         } catch (Throwable e) {
             CachedIntrospectionResults.clearClassLoader(moduleClassLoader);
             throw new ModuleRuntimeException("init ModuleApplicationContext exception", e);
@@ -62,11 +61,6 @@ public class ModuleLoader implements ApplicationContextAware {
             // 还原当前线程的ClassLoader
             Thread.currentThread().setContextClassLoader(currentClassLoader);
         }
-    }
-
-    private String pathToModuleName(Path jarPath) {
-        String pathStr = jarPath.toString();
-        return pathStr.substring(pathStr.lastIndexOf(File.separatorChar) + 1, pathStr.lastIndexOf("."));
     }
 
 }

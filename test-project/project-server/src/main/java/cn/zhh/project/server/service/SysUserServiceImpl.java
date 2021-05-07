@@ -18,4 +18,5 @@ public class SysUserServiceImpl implements SysUserService {
     public Optional<SysUser> getByCode(String code) {
         return sysUserMapper.selectByCode(code);
     }
+
 }

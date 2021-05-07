@@ -6,6 +6,7 @@ import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
@@ -17,6 +18,7 @@ import javax.sql.DataSource;
         sqlSessionFactoryRef = "moduleSqlSessionFactory",
         sqlSessionTemplateRef = "moduleSqlSessionTemplate"
 )
+@Configuration
 public class MybatisConfig {
 
     @Bean

@@ -17,6 +17,7 @@ public class QueryKingInfoHandler implements Handler {
     @Autowired
     private KingRoleService kingRoleService;
 
+    @Override
     public Object execute(String handlerArgs) {
         GetSysUserByCodeReq req = GsonUtils.fromJson(handlerArgs, GetSysUserByCodeReq.class);
         return sysUserService.getByCode(req.getCode())
@@ -31,7 +32,8 @@ public class QueryKingInfoHandler implements Handler {
                 .orElse(null);
     }
 
-    public String getHandlerName() {
+    @Override
+    public String name() {
         return "QueryKingInfo";
     }
 
