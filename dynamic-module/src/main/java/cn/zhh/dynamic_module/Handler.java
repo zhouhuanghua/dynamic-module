@@ -2,8 +2,8 @@ package cn.zhh.dynamic_module;
 
 public interface Handler {
 
-    Object execute(String handlerArgs);
+    Object execute(String params);
 
-    String getHandlerName();
+    String name();
 
 }

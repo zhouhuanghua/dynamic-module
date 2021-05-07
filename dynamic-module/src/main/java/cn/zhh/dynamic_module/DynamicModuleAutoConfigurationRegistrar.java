@@ -18,13 +18,23 @@ public class DynamicModuleAutoConfigurationRegistrar implements ImportBeanDefini
         if (Objects.isNull(annotationAttributes)) {
             throw new ModuleRuntimeException("@EnableDynamicModuleAutoConfiguration annotationAttributes is null");
         }
-        AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(ModuleService.class)
-                .setInitMethodName("init")
-                .setDestroyMethodName("destroy")
-                .addPropertyValue("watchPath", annotationAttributes.getString("moduleJarAbsolutePath"))
-                .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE)
+        String moduleJarAbsolutePath = annotationAttributes.getString("moduleJarAbsolutePath");
+        // 注册AddServlet
+        registerBeanDefinition(beanDefinitionRegistry, moduleJarAbsolutePath, "newAddInstance", "addServlet");
+        // 注册QueryServlet
+        registerBeanDefinition(beanDefinitionRegistry, moduleJarAbsolutePath, "newQueryInstance", "queryServlet");
+        // 注册RemoveServlet
+        registerBeanDefinition(beanDefinitionRegistry, moduleJarAbsolutePath, "newRemoveInstance", "removeServlet");
+    }
+
+    private void registerBeanDefinition(BeanDefinitionRegistry beanDefinitionRegistry, String moduleJarAbsolutePath, String factoryMethod, String beanName) {
+        AbstractBeanDefinition removeBeanDefinition = BeanDefinitionBuilder.genericBeanDefinition(ModuleManagerServletRegistrar.class)
+                .setFactoryMethod(factoryMethod)
+                .addPropertyValue("moduleJarAbsolutePath", moduleJarAbsolutePath)
+                .addPropertyReference("moduleManager", "moduleManager")
+                .setAutowireMode(AbstractBeanDefinition.AUTOWIRE_NO)
                 .getBeanDefinition();
-        beanDefinitionRegistry.registerBeanDefinition("moduleService", beanDefinition);
+        beanDefinitionRegistry.registerBeanDefinition(beanName, removeBeanDefinition);
     }
 
 }

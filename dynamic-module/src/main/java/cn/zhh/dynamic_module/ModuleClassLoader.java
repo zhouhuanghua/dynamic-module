@@ -1,12 +1,12 @@
 package cn.zhh.dynamic_module;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -21,8 +21,8 @@ public class ModuleClassLoader extends URLClassLoader {
 
     private final Set<String> overridePackages;
 
-    public ModuleClassLoader(URL ulr, ClassLoader parent) {
-        super(new URL[]{ulr}, parent);
+    public ModuleClassLoader(URL url, ClassLoader parent) {
+        super(new URL[]{url}, parent);
         this.excludedPackages = Sets.newHashSet(Arrays.asList(DEFAULT_EXCLUDED_PACKAGES.clone()));
         this.overridePackages = Sets.newHashSet();
     }
@@ -45,7 +45,7 @@ public class ModuleClassLoader extends URLClassLoader {
                 }
                 result = loadClassForOverriding(name);
             }
-            if (result != null) {
+            if (Objects.nonNull(result)) {
                 // 链接类
                 if (resolve) {
                     resolveClass(result);
@@ -60,7 +60,7 @@ public class ModuleClassLoader extends URLClassLoader {
     private Class<?> loadClassForOverriding(String name) throws ClassNotFoundException {
         // 查找已加载的类
         Class<?> result = findLoadedClass(name);
-        if (result == null) {
+        if (Objects.isNull(result)) {
             // 加载类
             result = findClass(name);
         }
@@ -69,12 +69,7 @@ public class ModuleClassLoader extends URLClassLoader {
 
     private boolean isEligibleForOverriding(final String name) {
         checkNotNull(name, "name is null");
-        return !isExcluded(name) && any(overridePackages, new Predicate<String>() {
-            @Override
-            public boolean apply(String prefix) {
-                return name.startsWith(prefix);
-            }
-        });
+        return !isExcluded(name) && any(overridePackages, prefix -> name.startsWith(prefix));
     }
 
     protected boolean isExcluded(String className) {

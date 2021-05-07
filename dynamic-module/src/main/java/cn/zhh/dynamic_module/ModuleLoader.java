@@ -41,8 +41,7 @@ public class ModuleLoader implements ApplicationContextAware {
             throw new ModuleRuntimeException("module config has and only has one");
         }
         ModuleConfig moduleConfig = moduleConfigList.get(0);
-        moduleClassLoader.addExcludedPackages(moduleConfig.getOverridePackages());
-
+        moduleClassLoader.addOverridePackages(moduleConfig.overridePackages());
         ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             // 把当前线程的ClassLoader切换成模块的
@@ -50,10 +49,10 @@ public class ModuleLoader implements ApplicationContextAware {
             ModuleApplicationContext moduleApplicationContext = new ModuleApplicationContext();
             moduleApplicationContext.setParent(applicationContext);
             moduleApplicationContext.setClassLoader(moduleClassLoader);
-            moduleApplicationContext.scan(moduleConfig.getScanPackages().toArray(new String[0]));
+            moduleApplicationContext.scan(moduleConfig.scanPackages().toArray(new String[0]));
             moduleApplicationContext.refresh();
             if (log.isInfoEnabled()) {
-                log.info("Load module success: jarPath={}, desc={}", jarPath.toString(), moduleConfig.getDesc());
+                log.info("Load module success: jarPath={}, desc={}", jarPath.toString(), moduleConfig.desc());
             }
             return new Module(pathToModuleName(jarPath), moduleConfig, moduleApplicationContext);
         } catch (Throwable e) {

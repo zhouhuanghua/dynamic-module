@@ -6,13 +6,17 @@ import java.util.Set;
 
 public abstract class ModuleConfig {
 
-    public abstract String getDesc();
+    public abstract String name();
 
-    public Set<String> getScanPackages() {
+    public abstract String version();
+
+    public abstract String desc();
+
+    public Set<String> scanPackages() {
         return Sets.newHashSet(this.getClass().getPackage().getName());
     }
 
-    public Set<String> getOverridePackages() {
+    public Set<String> overridePackages() {
         return Sets.newHashSet();
     }
 

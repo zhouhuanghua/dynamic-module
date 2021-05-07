@@ -97,7 +97,7 @@ public class Module {
         }
         // close spring context
         closeQuietly(moduleApplicationContext);
-        // clean classloader
+        // clean class loader
         clear(moduleApplicationContext.getClassLoader());
     }
 
@@ -110,7 +110,7 @@ public class Module {
         }
     }
 
-    public void clear(ClassLoader classLoader) {
+    private void clear(ClassLoader classLoader) {
         checkNotNull(classLoader, "classLoader is null");
         // Introspector缓存BeanInfo类来获得更好的性能。卸载时刷新所有Introspector的内部缓存。
         Introspector.flushCaches();
