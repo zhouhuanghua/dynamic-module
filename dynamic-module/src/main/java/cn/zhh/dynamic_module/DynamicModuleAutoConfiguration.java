@@ -1,8 +1,19 @@
 package cn.zhh.dynamic_module;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 
-public class DynamicModuleAutoConfiguration {
+import javax.annotation.PostConstruct;
+
+@Slf4j
+class DynamicModuleAutoConfiguration {
+
+    @PostConstruct
+    public void init() {
+        if (log.isInfoEnabled()) {
+            log.info("Start to load DynamicModuleAutoConfiguration...");
+        }
+    }
 
     @Bean
     public ModuleLoader moduleLoader() {
@@ -12,6 +23,11 @@ public class DynamicModuleAutoConfiguration {
     @Bean
     public ModuleManager moduleManager() {
         return new ModuleManager();
+    }
+
+    @Bean
+    public ModuleService moduleService() {
+        return new ModuleService();
     }
 
 }

@@ -18,8 +18,8 @@ public class QueryKingInfoHandler implements Handler {
     private KingRoleService kingRoleService;
 
     @Override
-    public Object execute(String handlerArgs) {
-        GetSysUserByCodeReq req = GsonUtils.fromJson(handlerArgs, GetSysUserByCodeReq.class);
+    public Object execute(String params) {
+        GetSysUserByCodeReq req = GsonUtils.fromJson(params, GetSysUserByCodeReq.class);
         return sysUserService.getByCode(req.getCode())
                 .map(sysUser -> {
                     KingInfo kingInfo = new KingInfo();

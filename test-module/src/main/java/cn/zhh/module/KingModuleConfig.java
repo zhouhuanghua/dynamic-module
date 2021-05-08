@@ -14,6 +14,7 @@ public class KingModuleConfig extends ModuleConfig {
         return "1.0";
     }
 
+    @Override
     public String desc() {
         return "Loops King";
     }

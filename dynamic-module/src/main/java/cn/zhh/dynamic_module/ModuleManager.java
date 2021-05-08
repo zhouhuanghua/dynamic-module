@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 @Slf4j
-public class ModuleManager implements DisposableBean {
+class ModuleManager implements DisposableBean {
 
     /**
      * 已注册的所有模块
@@ -51,7 +51,7 @@ public class ModuleManager implements DisposableBean {
             try {
                 each.destroy();
             } catch (Exception e) {
-                log.error("Failed to destroy module: " + toKey(each.getModuleConfig().name(), each.getModuleConfig().version()), e);
+                log.error(String.format("Failed to destroy module: %s", toKey(each.getModuleConfig().name(), each.getModuleConfig().version())), e);
             }
         }
         allModules.clear();

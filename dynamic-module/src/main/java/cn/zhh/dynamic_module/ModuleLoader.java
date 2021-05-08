@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.ServiceLoader;
 
 @Slf4j
-public class ModuleLoader implements ApplicationContextAware {
+class ModuleLoader implements ApplicationContextAware {
 
     /**
      * 注入父applicationContext
@@ -28,11 +28,14 @@ public class ModuleLoader implements ApplicationContextAware {
      * @return Module
      */
     public Module load(Path jarPath) {
+        if (log.isInfoEnabled()) {
+            log.info("Start to load module: {}", jarPath);
+        }
         ModuleClassLoader moduleClassLoader;
         try {
             moduleClassLoader = new ModuleClassLoader(jarPath.toUri().toURL(), applicationContext.getClassLoader());
         } catch (MalformedURLException e) {
-            throw new ModuleRuntimeException("create classloader exception", e);
+            throw new ModuleRuntimeException("create ModuleClassLoader exception", e);
         }
         List<ModuleConfig> moduleConfigList = new ArrayList<>();
         ServiceLoader.load(ModuleConfig.class, moduleClassLoader).forEach(moduleConfigList::add);
@@ -55,8 +58,9 @@ public class ModuleLoader implements ApplicationContextAware {
             }
             return new Module(jarPath, moduleConfig, moduleApplicationContext);
         } catch (Throwable e) {
+            log.error(String.format("Load module exception, jarPath=%s", jarPath), e);
             CachedIntrospectionResults.clearClassLoader(moduleClassLoader);
-            throw new ModuleRuntimeException("init ModuleApplicationContext exception", e);
+            throw new ModuleRuntimeException("create ModuleApplicationContext exception", e);
         } finally {
             // 还原当前线程的ClassLoader
             Thread.currentThread().setContextClassLoader(currentClassLoader);

@@ -13,7 +13,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.any;
 
 @Slf4j
-public class ModuleClassLoader extends URLClassLoader {
+class ModuleClassLoader extends URLClassLoader {
 
     public static final String[] DEFAULT_EXCLUDED_PACKAGES = new String[]{"java.", "javax.", "sun.", "oracle."};
 

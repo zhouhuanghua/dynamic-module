@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * APP
  */
 @SpringBootApplication
-@EnableDynamicModuleAutoConfiguration(moduleJarAbsolutePath = "/home/zhh/IdeaProjects/dynamic-module/test-project/module_jar")
+@EnableDynamicModuleAutoConfiguration(moduleJarAbsolutePath = "/Users/mozat-gz/IdeaProjects/dynamic-module/test-project/module_jar")
 public class App {
 
     public static void main(String[] args) {

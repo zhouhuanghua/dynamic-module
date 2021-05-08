@@ -1,6 +1,6 @@
 package cn.zhh.dynamic_module;
 
-public class ModuleRuntimeException extends RuntimeException {
+class ModuleRuntimeException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 

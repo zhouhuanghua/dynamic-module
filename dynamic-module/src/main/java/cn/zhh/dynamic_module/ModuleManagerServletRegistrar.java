@@ -1,7 +1,5 @@
 package cn.zhh.dynamic_module;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Setter;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 
@@ -18,19 +16,13 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
-public class ModuleManagerServletRegistrar extends ServletRegistrationBean<HttpServlet> {
+class ModuleManagerServletRegistrar extends ServletRegistrationBean<HttpServlet> {
 
     @Setter
     private String moduleJarAbsolutePath;
-
     @Setter
-    private ModuleLoader moduleLoader;
-
-    @Setter
-    private ModuleManager moduleManager;
+    private ModuleService moduleService;
 
     public ModuleManagerServletRegistrar() {
         super();
@@ -69,8 +61,7 @@ public class ModuleManagerServletRegistrar extends ServletRegistrationBean<HttpS
             try {
                 Path jarPath = Paths.get(ModuleManagerServletRegistrar.this.moduleJarAbsolutePath, DTF.format(LocalDateTime.now()) + ".jar");
                 Files.copy(req.getPart("jar").getInputStream(), jarPath, StandardCopyOption.REPLACE_EXISTING);
-                Module module = ModuleManagerServletRegistrar.this.moduleLoader.load(jarPath);
-                ModuleManagerServletRegistrar.this.moduleManager.register(module);
+                ModuleManagerServletRegistrar.this.moduleService.loadAndRegister(jarPath);
                 resp.getWriter().write("OK");
             } catch (Throwable t) {
                 t.printStackTrace(resp.getWriter());
@@ -79,38 +70,22 @@ public class ModuleManagerServletRegistrar extends ServletRegistrationBean<HttpS
     }
 
     private class ModuleQueryServlet extends HttpServlet {
-
         protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
             try {
-                List<ModuleVO> result = ModuleManagerServletRegistrar.this.moduleManager.allModules().stream().map(module -> {
-                    ModuleConfig moduleConfig = module.getModuleConfig();
-                    return new ModuleVO(moduleConfig.name(), moduleConfig.version(), moduleConfig.desc(), module.getJarPath().toString());
-                }).collect(Collectors.toList());
+                String result = moduleService.queryAllModule();
                 resp.setCharacterEncoding(StandardCharsets.UTF_8.name());
-                resp.getWriter().print(GsonUtils.toJson(result));
+                resp.getWriter().print(result);
             } catch (Throwable t) {
                 t.printStackTrace(resp.getWriter());
             }
         }
-
-        @Data
-        @AllArgsConstructor
-        private class ModuleVO {
-            private String name;
-            private String version;
-            private String desc;
-            private String jarPath;
-        }
     }
 
     private class ModuleRemoveServlet extends HttpServlet {
-
         protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
             try {
                 String moduleName = req.getParameter("moduleName"), moduleVersion = req.getParameter("moduleVersion");
-                Module module = ModuleManagerServletRegistrar.this.moduleManager.remove(moduleName, moduleVersion);
-                module.destroy();
-                Files.deleteIfExists(module.getJarPath());
+                ModuleManagerServletRegistrar.this.moduleService.removeAndDestroy(moduleName, moduleVersion);
                 resp.getWriter().write("OK");
             } catch (Throwable t) {
                 t.printStackTrace(resp.getWriter());

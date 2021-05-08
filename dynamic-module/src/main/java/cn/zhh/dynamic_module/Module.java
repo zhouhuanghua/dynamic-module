@@ -5,12 +5,14 @@ import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.CachedIntrospectionResults;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.StringUtils;
 
 import java.beans.Introspector;
+import java.io.IOException;
+import java.net.URLClassLoader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -21,7 +23,7 @@ import static com.google.common.base.Preconditions.checkState;
 @Data
 @Slf4j
 @AllArgsConstructor
-public class Module {
+class Module {
 
     private Path jarPath;
 
@@ -48,9 +50,6 @@ public class Module {
             }
             checkState(!handlers.containsKey(handlerName), "Duplicated handler %s found by: %s",
                     Handler.class.getSimpleName(), handlerName);
-            if (log.isInfoEnabled()) {
-                log.info("Scan handler: {}", handlerName);
-            }
             handlers.put(handlerName, handler);
         }
         if (log.isInfoEnabled()) {
@@ -59,14 +58,10 @@ public class Module {
         return ImmutableMap.copyOf(handlers);
     }
 
-    public Map<String, Handler> getHandlers() {
-        return handlers;
-    }
-
     public Handler getHandler(String handlerName) {
         checkNotNull(handlerName, "handlerName is null");
         Handler handler = handlers.get(handlerName);
-        checkNotNull(handler, "find handler is null, handlerName=" + handlerName);
+        checkNotNull(handler, String.format("find handler is null, handlerName=%s", handlerName));
         return handler;
     }
 
@@ -85,24 +80,26 @@ public class Module {
             Thread.currentThread().setContextClassLoader(moduleClassLoader);
             return handler.execute(handlerArgs);
         } catch (Exception e) {
-            log.error("Invoke module exception, handler=" + handler.name(), e);
-            throw new ModuleRuntimeException("doHandlerWithinModuleClassLoader has error, handler=" + handler, e);
+            log.error(String.format("Invoke module exception, handler=%s", handler.name()), e);
+            throw new ModuleRuntimeException(String.format("doHandlerWithinModuleClassLoader has error, handler=%s", handler.getClass().getName()), e);
         } finally {
             Thread.currentThread().setContextClassLoader(classLoader);
         }
     }
 
-    public void destroy() {
+    public void destroy() throws Exception {
         if (log.isInfoEnabled()) {
-            log.info("Close application context: {}", moduleApplicationContext);
+            log.info("Destroy module: name={}, version={}", moduleConfig.name(), moduleConfig.version());
         }
         // close spring context
-        closeQuietly(moduleApplicationContext);
+        closeApplicationContext(moduleApplicationContext);
         // clean class loader
-        clear(moduleApplicationContext.getClassLoader());
+        clearClassLoader((URLClassLoader) moduleApplicationContext.getClassLoader());
+        // delete jar file
+        Files.deleteIfExists(jarPath);
     }
 
-    private void closeQuietly(ConfigurableApplicationContext applicationContext) {
+    private void closeApplicationContext(ConfigurableApplicationContext applicationContext) {
         checkNotNull(applicationContext, "applicationContext is null");
         try {
             applicationContext.close();
@@ -111,15 +108,16 @@ public class Module {
         }
     }
 
-    private void clear(ClassLoader classLoader) {
+    private void clearClassLoader(URLClassLoader classLoader) throws IOException {
         checkNotNull(classLoader, "classLoader is null");
         // Introspector缓存BeanInfo类来获得更好的性能。卸载时刷新所有Introspector的内部缓存。
         Introspector.flushCaches();
         // 从已经使用给定类加载器加载的缓存中移除所有资源包
         ResourceBundle.clearCache(classLoader);
-        // Clear the introspection cache for the given ClassLoader
+        // clear the introspection cache for the given ClassLoader
         CachedIntrospectionResults.clearClassLoader(classLoader);
-        LogFactory.release(classLoader);
+        // close
+        classLoader.close();
     }
 
 }
