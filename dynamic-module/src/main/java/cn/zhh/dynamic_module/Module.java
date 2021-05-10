@@ -94,7 +94,7 @@ class Module {
         // close spring context
         closeApplicationContext(moduleApplicationContext);
         // clean class loader
-        clearClassLoader((URLClassLoader) moduleApplicationContext.getClassLoader());
+        clearClassLoader(moduleApplicationContext.getClassLoader());
         // delete jar file
         Files.deleteIfExists(jarPath);
     }
@@ -108,7 +108,7 @@ class Module {
         }
     }
 
-    private void clearClassLoader(URLClassLoader classLoader) throws IOException {
+    private void clearClassLoader(ClassLoader classLoader) throws IOException {
         checkNotNull(classLoader, "classLoader is null");
         // Introspector缓存BeanInfo类来获得更好的性能。卸载时刷新所有Introspector的内部缓存。
         Introspector.flushCaches();
@@ -117,7 +117,9 @@ class Module {
         // clear the introspection cache for the given ClassLoader
         CachedIntrospectionResults.clearClassLoader(classLoader);
         // close
-        classLoader.close();
+        if (classLoader instanceof URLClassLoader) {
+            ((URLClassLoader) classLoader).close();
+        }
     }
 
 }
