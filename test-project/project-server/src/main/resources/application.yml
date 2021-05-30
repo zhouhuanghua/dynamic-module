@@ -1,8 +1,8 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://thunderclap.cn:3306/test?useSSL=true
-    username: zhh
+    url: jdbc:mysql://ip:port/test?useSSL=true
+    username: root
     password: 123456
 
 mybatis:
